@@ -2,6 +2,8 @@
  
 A React + TypeScript todo list where items are categorized into **Fruit** and **Vegetable** columns, auto-return to the main list after 5 seconds, and can be manually sent back by clicking them in their column.
  
+🔗 **Live Demo:** [https://fullstack-coding-test-tawny.vercel.app](https://fullstack-coding-test-tawny.vercel.app)
+ 
 ---
  
 ## Features
@@ -70,3 +72,7 @@ src/
 - **Single `AUTO_RETURN_MS` constant** — change the value in one place to adjust the delay globally
 - **Styles co-located as a `styles` object** — keeps JSX readable without adding a CSS file or extra dependency
 ---
+ 
+## Deployment (Vercel)
+ 
+This project is deployed on [Vercel](https://vercel.com) with zero configuration.
