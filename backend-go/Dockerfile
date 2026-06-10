@@ -1,14 +1,13 @@
-# Stage 1: build
 FROM golang:1.26-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o server ./cmd/api
- 
-# Stage 2: minimal runtime image
+ARG CMD=cmd/api
+RUN go build -o server ./${CMD}
+
 FROM alpine:3.19
 WORKDIR /app
 COPY --from=builder /app/server .
-EXPOSE 8080
+EXPOSE 8080 50051
 CMD ["./server"]

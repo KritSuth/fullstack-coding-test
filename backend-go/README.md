@@ -1,31 +1,41 @@
 # User Management API (Go)
  
-A RESTful API built with Go for managing users, using MongoDB for persistence and JWT for authentication.
+A RESTful API built with Go for managing users, using MongoDB for persistence and JWT for authentication. Also includes a gRPC server for internal service communication.
  
 ## Tech Stack
  
 - **Go 1.26** — standard `net/http` with Go 1.26 routing (`r.PathValue`)
 - **MongoDB** — official Go driver (`go.mongodb.org/mongo-driver`)
 - **JWT** — `golang-jwt/jwt` with HS256 signing
-- **Docker** — multi-stage build + docker-compose for API and MongoDB
+- **gRPC** — Protocol Buffers for `CreateUser` and `GetUser`
+- **Docker** — multi-stage build + docker-compose for API, gRPC, and MongoDB
 ## Project Structure
  
 ```
 backend-go/
-├── cmd/api/
-│   └── main.go                  # Entry point, server setup, graceful shutdown
+├── cmd/
+│   ├── api/
+│   │   └── main.go                  # REST API entry point, graceful shutdown
+│   └── grpc/
+│       └── main.go                  # gRPC server entry point
 ├── internal/
+│   ├── grpc/
+│   │   └── user_server.go           # gRPC handler implementation
 │   ├── handler/
-│   │   └── user_handler.go      # HTTP handlers
+│   │   └── user_handler.go          # HTTP handlers
 │   ├── middleware/
-│   │   └── middleware.go        # JWT auth + request logger
+│   │   └── middleware.go            # JWT auth + request logger
 │   ├── model/
-│   │   └── user.go              # User struct and request/response types
+│   │   └── user.go                  # User struct, request/response types, validation
 │   ├── repository/
-│   │   └── user_repository.go   # UserRepository interface + MongoDB adapter
+│   │   └── user_repository.go       # UserRepository interface + MongoDB adapter
 │   └── service/
-│       ├── user_service.go      # Business logic
-│       └── user_service_test.go # Unit tests with mocked repository
+│       ├── user_service.go          # Business logic
+│       └── user_service_test.go     # Unit tests with mocked repository
+├── proto/
+│   ├── user.proto                   # Protobuf service definition
+│   ├── user.pb.go                   # Generated protobuf code
+│   └── user_grpc.pb.go              # Generated gRPC code
 ├── .env.example
 ├── docker-compose.yml
 ├── Dockerfile
@@ -38,6 +48,7 @@ backend-go/
 - **Standard library routing** — Go 1.26 added path parameters (`{id}`) to `net/http`, so no external router is needed.
 - **Background goroutine** — logs total user count every 10 seconds using `time.Ticker`.
 - **Graceful shutdown** — listens for `SIGINT`/`SIGTERM` and gives in-flight requests 5 seconds to finish.
+- **Input validation** — validated at the handler layer before reaching business logic.
 ---
  
 ## Getting Started
@@ -53,8 +64,9 @@ cp .env.example .env          # set JWT_SECRET
 docker-compose up --build
 ```
  
-API is available at `http://localhost:8080`.
- 
+Both servers start together:
+- REST API available at `http://localhost:8080`
+- gRPC server available at `localhost:50051`
 ### Option B — Run locally
  
 ```bash
@@ -62,7 +74,8 @@ cp .env.example .env          # set MONGO_URI and JWT_SECRET
  
 # load env vars, then run
 export $(cat .env | xargs)
-go run ./cmd/api
+go run ./cmd/api        # REST API
+go run ./cmd/grpc       # gRPC server
 ```
  
 ---
@@ -76,7 +89,7 @@ go run ./cmd/api
  
 ---
  
-## API Endpoints
+## REST API Endpoints
  
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -156,6 +169,25 @@ curl -X PUT http://localhost:8080/users/665f1a2b3c4d5e6f7a8b9c0d \
 # Delete user
 curl -X DELETE http://localhost:8080/users/665f1a2b3c4d5e6f7a8b9c0d \
   -H "Authorization: Bearer $TOKEN"
+```
+ 
+---
+ 
+## gRPC Server
+ 
+The gRPC server runs on port `50051` and exposes two methods defined in `proto/user.proto`:
+ 
+| Method | Request fields | Description |
+|--------|---------------|-------------|
+| `CreateUser` | name, email, password | Create a new user |
+| `GetUser` | id | Fetch a user by ID |
+ 
+### Regenerate protobuf code
+ 
+```bash
+protoc --go_out=. --go_opt=paths=source_relative \
+       --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+       proto/user.proto
 ```
  
 ---

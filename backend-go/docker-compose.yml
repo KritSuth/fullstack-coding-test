@@ -1,8 +1,25 @@
 services:
   api:
-    build: .
+    build:
+      context: .
+      args:
+        CMD: cmd/api
     ports:
       - "8080:8080"
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+    depends_on:
+      - mongo
+    restart: on-failure
+ 
+  grpc:
+    build:
+      context: .
+      args:
+        CMD: cmd/grpc
+    ports:
+      - "50051:50051"
     environment:
       MONGO_URI: mongodb://mongo:27017
       JWT_SECRET: ${JWT_SECRET:-changeme}

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/yourorg/user-api/internal/model"
-	"github.com/yourorg/user-api/internal/service"
+	"github.com/KritSuth/fullstack-coding-test/backend-go/internal/model"
+	"github.com/KritSuth/fullstack-coding-test/backend-go/internal/service"
 )
 
 type UserHandler struct {
