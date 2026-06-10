@@ -4,7 +4,7 @@ A RESTful API built with Go for managing users, using MongoDB for persistence an
  
 ## Tech Stack
  
-- **Go 1.22** — standard `net/http` with Go 1.22 routing (`r.PathValue`)
+- **Go 1.26** — standard `net/http` with Go 1.26 routing (`r.PathValue`)
 - **MongoDB** — official Go driver (`go.mongodb.org/mongo-driver`)
 - **JWT** — `golang-jwt/jwt` with HS256 signing
 - **Docker** — multi-stage build + docker-compose for API and MongoDB
@@ -35,7 +35,7 @@ backend-go/
 ### Architecture decisions
  
 - **Hexagonal-inspired** — `repository` defines an interface (port); `mongoUserRepository` is the adapter. Business logic in `service` depends only on the interface, not on MongoDB directly — making it easy to mock in tests.
-- **Standard library routing** — Go 1.22 added path parameters (`{id}`) to `net/http`, so no external router is needed.
+- **Standard library routing** — Go 1.26 added path parameters (`{id}`) to `net/http`, so no external router is needed.
 - **Background goroutine** — logs total user count every 10 seconds using `time.Ticker`.
 - **Graceful shutdown** — listens for `SIGINT`/`SIGTERM` and gives in-flight requests 5 seconds to finish.
 ---
@@ -44,7 +44,7 @@ backend-go/
  
 ### Prerequisites
  
-- Go >= 1.22
+- Go >= 1.26
 - MongoDB running locally **or** Docker + Docker Compose
 ### Option A — Run with Docker (recommended)
  
